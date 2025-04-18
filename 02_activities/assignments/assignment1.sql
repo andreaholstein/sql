@@ -90,7 +90,10 @@ ORDER BY v.vendor_name, vb.market_date;
 -- AGGREGATE
 /* 1. Write a query that determines how many times each vendor has rented a booth 
 at the farmer’s market by counting the vendor booth assignments per vendor_id. */
-
+SELECT 
+vendor_id, COUNT(vendor_id) as rentals, market_date
+FROM vendor_booth_assignments
+GROUP BY vendor_id;
 
 
 /* 2. The Farmer’s Market Customer Appreciation Committee wants to give a bumper 
@@ -115,7 +118,7 @@ VALUES(col1,col2,col3,col4,col5)
 
 
 
--- Date
+-- Date -- SKIPPED
 /*1. Get the customer_id, month, and year (in separate columns) of every purchase in the customer_purchases table.
 
 HINT: you might need to search for strfrtime modifers sqlite on the web to know what the modifers for month 
