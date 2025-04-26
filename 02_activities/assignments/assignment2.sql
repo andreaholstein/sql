@@ -40,7 +40,7 @@ HINT: One of these approaches uses ROW_NUMBER() and one uses DENSE_RANK(). */
 -- vendor_id,
 -- quantity*cost_to_customer_per_qty as price,
 -- market_date,
--- DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY market_date ASC) as visit
+-- DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY market_date ASC) ==as visit
 -- FROM customer_purchases;
 
 
@@ -57,17 +57,17 @@ only the customer’s most recent visit. */
 -- 	FROM customer_purchases
 -- ) x
 -- INNER JOIN customer c
--- 	ON x.customer_id = c.customer_id
+-- 	ON x.customer_id = c.customer_id=
 -- 	
 -- WHERE x.visit = 1;
 
 /* 3. Using a COUNT() window function, include a value along with each row of the 
 customer_purchases table that indicates how many different times that customer has purchased that product_id. */
 
-	SELECT *,
-	COUNT(product_id) as times_purchased
-	FROM customer_purchases
-	GROUP BY customer_id, product_id
+-- 	SELECT *,
+-- 	COUNT(product_id) as times_purchased
+-- 	FROM customer_purchases
+-- 	GROUP BY customer_id, product_id
 
 -- String manipulations
 /* 1. Some product names in the product table have descriptions like "Jar" or "Organic". 
@@ -82,7 +82,9 @@ Remove any trailing or leading whitespaces. Don't just use a case statement for 
 Hint: you might need to use INSTR(product_name,'-') to find the hyphens. INSTR will help split the column. */
 
 
-
+SELECT * 
+FROM PRODUCT
+;
 /* 2. Filter the query to show any product_size value that contain a number with REGEXP. */
 
 
