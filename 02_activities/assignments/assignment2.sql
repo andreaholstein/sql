@@ -151,7 +151,8 @@ VALUES(101, 'Dalmatians', 'puppy', 7, 'unit', datetime());
 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
 
-
+DELETE FROM product_units
+WHERE product_id = 101;
 
 -- UPDATE
 /* 1.We want to add the current_quantity to the product_units table. 
