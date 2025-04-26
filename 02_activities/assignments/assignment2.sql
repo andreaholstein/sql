@@ -89,6 +89,12 @@ Hint: you might need to use INSTR(product_name,'-') to find the hyphens. INSTR w
 
 /* 2. Filter the query to show any product_size value that contain a number with REGEXP. */
 
+SELECT * 
+,NULLIF(LTRIM(RTRIM(SUBSTR(product_name,0,INSTR(product_name, '-')))),'') as description
+FROM PRODUCT
+WHERE product_size REGEXP '[0-9]' 
+ORDER BY product_name
+;
 
 -- UNION
 /* 1. Using a UNION, write a query that displays the market dates with the highest and lowest total sales.
