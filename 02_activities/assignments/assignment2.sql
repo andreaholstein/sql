@@ -40,7 +40,7 @@ HINT: One of these approaches uses ROW_NUMBER() and one uses DENSE_RANK(). */
 -- vendor_id,
 -- quantity*cost_to_customer_per_qty as price,
 -- market_date,
--- DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY market_date ASC) ==as visit
+-- DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY market_date ASC) as visit
 -- FROM customer_purchases;
 
 
@@ -106,10 +106,61 @@ HINT: There are a possibly a few ways to do this query, but if you're struggling
 3) Query the second temp table twice, once for the best day, once for the worst day, 
 with a UNION binding them. */
 
--- CIRCLE BACK !! --
--- SELECT * 
--- FROM 
--- ;
+
+--UNION/UNION ALL
+
+--most and least expensive product per vendor with a UNION
+
+DROP TABLE IF EXISTS temp.grouped_sales;
+
+CREATE TEMP TABLE temp.grouped_sales AS
+SELECT product_id, vendor_id, market_date, customer_id, sum(quantity*cost_to_customer_per_qty) as sales
+FROM customer_purchases
+GROUP BY market_date ORDER BY sales; 
+
+DROP TABLE IF EXISTS temp.ranked_sales;
+
+CREATE TEMP TABLE temp.ranked_sales AS
+SELECT product_id 
+,vendor_id 
+,market_date 
+,customer_id 
+,sales
+,RANK() OVER(PARTITION BY market_date ORDER BY sales DESC) as sales_max
+,RANK() OVER(PARTITION BY market_date ORDER BY sales ASC) as sales_min
+FROM grouped_sales;
+
+SELECT *
+FROM 
+(
+	SELECT DISTINCT
+	vendor_id 
+	,product_id
+	,sales 
+	,market_date
+	,ROW_NUMBER() OVER(ORDER BY sales DESC) as sales_rank
+
+	FROM ranked_sales
+) 
+where sales_rank = 1
+
+UNION  
+
+SELECT *
+FROM 
+(
+	SELECT DISTINCT
+	vendor_id 
+	,product_id
+	,sales 
+	,market_date
+	,ROW_NUMBER() OVER(ORDER BY sales ASC) as sales_rank
+
+	FROM ranked_sales
+) 
+where sales_rank = 2
+ORDER BY sales_rank;
+
 
 /* SECTION 3 */
 
@@ -124,7 +175,7 @@ Think a bit about the row counts: how many distinct vendors, product names are t
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
 
-
+-- CIRCLE BACK !! --
 
 -- INSERT
 /*1.  Create a new table "product_units". 
@@ -132,27 +183,27 @@ This table will contain only products where the `product_qty_type = 'unit'`.
 It should use all of the columns from the product table, as well as a new column for the `CURRENT_TIMESTAMP`.  
 Name the timestamp column `snapshot_timestamp`. */
 
-DROP TABLE IF EXISTS product_units;
-CREATE TABLE product_units AS 
-	SELECT * , datetime() as snapshot_timestamp
-	FROM product
-	WHERE product_qty_type = 'unit' 
-	ORDER BY product_name;
+-- DROP TABLE IF EXISTS product_units;
+-- CREATE TABLE product_units AS 
+-- 	SELECT * , datetime() as snapshot_timestamp
+-- 	FROM product
+-- 	WHERE product_qty_type = 'unit' 
+-- 	ORDER BY product_name;
 
 
 /*2. Using `INSERT`, add a new row to the product_units table (with an updated timestamp). 
 This can be any product you desire (e.g. add another record for Apple Pie). */
 
-INSERT INTO product_units
-VALUES(101, 'Dalmatians', 'puppy', 7, 'unit', datetime());
+-- INSERT INTO product_units
+-- VALUES(101, 'Dalmatians', 'puppy', 7, 'unit', datetime());
 
 -- DELETE
 /* 1. Delete the older record for the whatever product you added. 
 
 HINT: If you don't specify a WHERE clause, you are going to have a bad time.*/
 
-DELETE FROM product_units
-WHERE product_id = 101;
+-- DELETE FROM product_units
+-- WHERE product_id = 101;
 
 -- UPDATE
 /* 1.We want to add the current_quantity to the product_units table. 
@@ -171,6 +222,7 @@ Finally, make sure you have a WHERE statement to update the right row,
 	you'll need to use product_units.product_id to refer to the correct row within the product_units table. 
 When you have all of these components, you can run the update statement. */
 
-
+-- ALTER TABLE product_units
+-- ADD current_quantity INT;
 
 
