@@ -89,12 +89,12 @@ Hint: you might need to use INSTR(product_name,'-') to find the hyphens. INSTR w
 
 /* 2. Filter the query to show any product_size value that contain a number with REGEXP. */
 
-SELECT * 
-,NULLIF(LTRIM(RTRIM(SUBSTR(product_name,0,INSTR(product_name, '-')))),'') as description
-FROM PRODUCT
-WHERE product_size REGEXP '[0-9]' 
-ORDER BY product_name
-;
+-- SELECT * 
+-- ,NULLIF(LTRIM(RTRIM(SUBSTR(product_name,0,INSTR(product_name, '-')))),'') as description
+-- FROM PRODUCT
+-- WHERE product_size REGEXP '[0-9]' 
+-- ORDER BY product_name
+-- ;
 
 -- UNION
 /* 1. Using a UNION, write a query that displays the market dates with the highest and lowest total sales.
@@ -106,8 +106,10 @@ HINT: There are a possibly a few ways to do this query, but if you're struggling
 3) Query the second temp table twice, once for the best day, once for the worst day, 
 with a UNION binding them. */
 
-
-
+-- CIRCLE BACK !! --
+-- SELECT * 
+-- FROM 
+-- ;
 
 /* SECTION 3 */
 
@@ -130,12 +132,19 @@ This table will contain only products where the `product_qty_type = 'unit'`.
 It should use all of the columns from the product table, as well as a new column for the `CURRENT_TIMESTAMP`.  
 Name the timestamp column `snapshot_timestamp`. */
 
+DROP TABLE IF EXISTS product_units;
+CREATE TABLE product_units AS 
+	SELECT * , datetime() as snapshot_timestamp
+	FROM product
+	WHERE product_qty_type = 'unit' 
+	ORDER BY product_name;
 
 
 /*2. Using `INSERT`, add a new row to the product_units table (with an updated timestamp). 
 This can be any product you desire (e.g. add another record for Apple Pie). */
 
-
+INSERT INTO product_units
+VALUES(101, 'Dalmatians', 'puppy', 7, 'unit', datetime());
 
 -- DELETE
 /* 1. Delete the older record for the whatever product you added. 
