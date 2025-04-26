@@ -258,15 +258,47 @@ When you have all of these components, you can run the update statement. */
 
 ALTER TABLE product_units
 ADD current_quantity INT;
+SELECT * FROM product_units;
 
-SELECT * 
-FROM(
-	SELECT DISTINCT product_id, market_date, quantity
-	,RANK() OVER(PARTITION BY product_id ORDER BY market_date DESC) as latest_qty
-	FROM vendor_inventory
-)where latest_qty = 1
-ORDER BY latest_qty;
+DROP TABLE IF EXISTS temp.qty_check;
 
+CREATE TEMP TABLE temp.qty_check AS
+SELECT 
+-- * 
+-- FROM(
+-- 	SELECT DISTINCT 
+-- 	product_id
+-- -- 	,SUBSTR(snapshot_timestamp,1, 10) as snapshot
+-- 	,current_quantity
+-- 	,ROW_NUMBER() OVER(PARTITION BY product_id ORDER BY current_quantity DESC) as latest_qty
+-- 	FROM product_units pu	
+-- 
+-- ) new_qty
+-- WHERE latest_qty = 1
 
+-- SELECT * FROM temp.qty_check pu
+-- INNER JOIN vendor_inventory vi
+-- 	ON pu.product_id = vi.product_id;
+-- ORDER BY latest_qty;
+
+-- UPDATE product_units
+-- SET current_quantity = nt.quantity -- doesn't exist
+-- WHERE current_qty = NULL
+
+-- SELECT 
+-- pu.product_id
+-- ,product_name
+-- ,product_size
+-- ,product_category_id
+-- ,product_qty_type 
+-- -- ,pu.latest_qty -- broken
+-- -- ,pu.snapshot -- useless
+-- ,vi.quantity
+-- 
+-- FROM product_units pu
+-- INNER JOIN vendor_inventory vi
+-- 	ON pu.product_id = vi.product_id;
+
+-- 
 
 
