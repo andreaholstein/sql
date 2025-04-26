@@ -178,7 +178,7 @@ Before your final group by you should have the product of those two queries (x*y
 DROP TABLE IF EXISTS temp.vendor_products;
 
 CREATE TEMP TABLE temp.vendor_products AS
-SELECT v.vendor_name, p.product_name, vi.original_price
+SELECT DISTINCT v.vendor_name, p.product_name, (vi.original_price*5) AS five_purchased
 FROM 
 (
 	SELECT DISTINCT vendor_id, vendor_name 
@@ -187,6 +187,7 @@ FROM
 
 INNER JOIN vendor_inventory vi 
 	ON v.vendor_id = vi.vendor_id
+	
 INNER JOIN 
 (
 	SELECT DISTINCT product_id, product_name 
@@ -196,11 +197,19 @@ INNER JOIN
 	
 ORDER BY v.vendor_name;
 
--- cross join against customers
--- 
--- SELECT vendor_name, product_name
--- FROM vendor_products
--- CROSS JOIN customer
+SELECT vendor_name
+,product_name
+,five_purchased
+
+FROM vendor_products vp
+
+CROSS JOIN
+(
+	SELECT COUNT(customer_id) AS total_customers
+	FROM customer
+)AS c
+GROUP BY vp.product_name,
+ORDER BY vp.vendor_name, vp.product_name;
 
 -- INSERT
 /*1.  Create a new table "product_units". 
