@@ -111,55 +111,55 @@ with a UNION binding them. */
 
 --most and least expensive product per vendor with a UNION
 
-DROP TABLE IF EXISTS temp.grouped_sales;
-
-CREATE TEMP TABLE temp.grouped_sales AS
-SELECT product_id, vendor_id, market_date, customer_id, sum(quantity*cost_to_customer_per_qty) as sales
-FROM customer_purchases
-GROUP BY market_date ORDER BY sales; 
-
-DROP TABLE IF EXISTS temp.ranked_sales;
-
-CREATE TEMP TABLE temp.ranked_sales AS
-SELECT product_id 
-,vendor_id 
-,market_date 
-,customer_id 
-,sales
-,RANK() OVER(PARTITION BY market_date ORDER BY sales DESC) as sales_max
-,RANK() OVER(PARTITION BY market_date ORDER BY sales ASC) as sales_min
-FROM grouped_sales;
-
-SELECT *
-FROM 
-(
-	SELECT DISTINCT
-	vendor_id 
-	,product_id
-	,sales 
-	,market_date
-	,ROW_NUMBER() OVER(ORDER BY sales DESC) as sales_rank
-
-	FROM ranked_sales
-) 
-where sales_rank = 1
-
-UNION  
-
-SELECT *
-FROM 
-(
-	SELECT DISTINCT
-	vendor_id 
-	,product_id
-	,sales 
-	,market_date
-	,ROW_NUMBER() OVER(ORDER BY sales ASC) as sales_rank
-
-	FROM ranked_sales
-) 
-where sales_rank = 2
-ORDER BY sales_rank;
+-- DROP TABLE IF EXISTS temp.grouped_sales;
+-- 
+-- CREATE TEMP TABLE temp.grouped_sales AS
+-- SELECT product_id, vendor_id, market_date, customer_id, sum(quantity*cost_to_customer_per_qty) as sales
+-- FROM customer_purchases
+-- GROUP BY market_date ORDER BY sales; 
+-- 
+-- DROP TABLE IF EXISTS temp.ranked_sales;
+-- 
+-- CREATE TEMP TABLE temp.ranked_sales AS
+-- SELECT product_id 
+-- ,vendor_id 
+-- ,market_date 
+-- ,customer_id 
+-- ,sales
+-- ,RANK() OVER(PARTITION BY market_date ORDER BY sales DESC) as sales_max
+-- ,RANK() OVER(PARTITION BY market_date ORDER BY sales ASC) as sales_min
+-- FROM grouped_sales;
+-- 
+-- SELECT *
+-- FROM 
+-- (
+-- 	SELECT DISTINCT
+-- 	vendor_id 
+-- 	,product_id
+-- 	,sales 
+-- 	,market_date
+-- 	,ROW_NUMBER() OVER(ORDER BY sales DESC) as sales_rank
+-- 
+-- 	FROM ranked_sales
+-- ) 
+-- where sales_rank = 1
+-- 
+-- UNION  
+-- 
+-- SELECT *
+-- FROM 
+-- (
+-- 	SELECT DISTINCT
+-- 	vendor_id 
+-- 	,product_id
+-- 	,sales 
+-- 	,market_date
+-- 	,ROW_NUMBER() OVER(ORDER BY sales ASC) as sales_rank
+-- 
+-- 	FROM ranked_sales
+-- ) 
+-- where sales_rank = 2
+-- ORDER BY sales_rank;
 
 
 /* SECTION 3 */
@@ -174,8 +174,33 @@ Remember, CROSS JOIN will explode your table rows, so CROSS JOIN should likely b
 Think a bit about the row counts: how many distinct vendors, product names are there (x)?
 How many customers are there (y). 
 Before your final group by you should have the product of those two queries (x*y).  */
+	
+DROP TABLE IF EXISTS temp.vendor_products;
 
--- CIRCLE BACK !! --
+CREATE TEMP TABLE temp.vendor_products AS
+SELECT v.vendor_name, p.product_name, vi.original_price
+FROM 
+(
+	SELECT DISTINCT vendor_id, vendor_name 
+	FROM vendor
+) AS v
+
+INNER JOIN vendor_inventory vi 
+	ON v.vendor_id = vi.vendor_id
+INNER JOIN 
+(
+	SELECT DISTINCT product_id, product_name 
+	FROM product
+) AS p 
+	ON p.product_id = vi.product_id
+	
+ORDER BY v.vendor_name;
+
+-- cross join against customers
+-- 
+-- SELECT vendor_name, product_name
+-- FROM vendor_products
+-- CROSS JOIN customer
 
 -- INSERT
 /*1.  Create a new table "product_units". 
